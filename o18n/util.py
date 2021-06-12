@@ -8,9 +8,7 @@ from django.test.signals import setting_changed
 from django.utils.translation import get_language
 from django.utils.translation.trans_real import get_supported_language_variant
 
-
-country_language_prefix_re = re.compile(r'^/([a-z]{2})/(?:([a-z]{2})/)?')
-
+country_language_prefix_re = re.compile(r'^/([a-z]{2})-(?:([A-Z]{2})/)?')
 _language_maps = None
 
 
@@ -36,6 +34,12 @@ def _variant(country, language):
             "No matching locale found for '{}'. ".format(language_code) +
             "Check your COUNTRIES and LANGUAGES settings.")
 
+def get_countries_by_language(language_code):
+    countries = []
+    for i in get_countries_setting():
+        if language_code in i[2]:
+            countries.append(i[0])
+    return countries
 
 def get_language_maps():
     """
@@ -73,18 +77,21 @@ def get_country_language(request):
     Return the country and language information when found in the path.
     """
     regex_match = country_language_prefix_re.match(request.path_info)
-    if not regex_match:
-        return None, None, settings.LANGUAGE_CODE
 
-    country, language = regex_match.groups()
 
+    if regex_match:
+        language, country = regex_match.groups()
+    else:
+        language = get_language()
+        countries = get_countries_by_language(get_language())
+        country = countries[0] if len(countries) else None
     try:
-        language, language_code = get_language_maps()[country][language]
+        language, language_code = get_language_maps()[country.lower()][language]
     except KeyError:
         return None, None, settings.LANGUAGE_CODE
 
-    return country, language, language_code
 
+    return country.lower(), language, language_code
 
 def get_country_language_prefix():
     """
@@ -99,11 +106,10 @@ def get_country_language_prefix():
     language = get_language().split('-')[0]
     language_map = get_language_maps()[country]
     if language in language_map:
-        # non-main language
-        return '/'.join((country, language))
+        countries = get_countries_by_language(language)
+        if len(countries) == 1:
+            return language + "/"
+        return "-".join((language, country.upper())) + "/"
     elif None in language_map and language_map[None][0] == language:
-        # main language
-        return country
-    else:
-        # invalid language
-        return None
+        return language
+    return None

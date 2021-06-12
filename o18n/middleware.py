@@ -1,32 +1,18 @@
+from django.conf import settings
+from django.conf.urls.i18n import is_language_prefix_patterns_used
 from django.utils import translation
+from django.middleware.locale import LocaleMiddleware
 
-from . import country as country_mod
-from . import util
-
-
-class CountryLanguageMiddleware(object):
-    """
-    Variant of django.middleware.locale.LocaleMiddleware.
-
-    Uses the /<country>/<language>/ format for URL prefixes.
-
-    Sets request.COUNTRY and request.LANGUAGE.
-    """
-
+class CountryLocaleMiddleware(LocaleMiddleware):
+    
     def process_request(self, request):
-        country, language, language_code = util.get_country_language(request)
-
-        if country is None:
-            country_mod.deactivate()
-        else:
-            country_mod.activate(country)
-        translation.activate(language_code)
-
-        request.COUNTRY = country
-        request.LANGUAGE = language
-        request.LANGUAGE_CODE = language_code
-
-    def process_response(self, request, response):
-        if 'Content-Language' not in response:
-            response['Content-Language'] = translation.get_language()
-        return response
+        super().process_request(request)
+        from .util import get_country_language
+        request.COUNTRY = get_country_language(request)[0]
+        from . import country as country_mod
+        try:
+            country_mod.activate(request.COUNTRY)
+        except ValueError:
+            translation.activate(settings.LANGUAGE_CODE)
+            request.LANGUAGE_CODE = translation.get_language()
+            request.COUNTRY = None
