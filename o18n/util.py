@@ -87,7 +87,7 @@ def get_country_language(request):
         country = countries[0] if len(countries) else None
     try:
         language, language_code = get_language_maps()[country.lower()][language]
-    except KeyError:
+    except (KeyError, AttributeError):
         return None, None, settings.LANGUAGE_CODE
 
 
