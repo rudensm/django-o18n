@@ -22,8 +22,11 @@ class CountryLocaleMiddleware(LocaleMiddleware):
             request.COUNTRY = get_default_country_for_language(request.LANGUAGE_CODE)
         from .util import get_country_language_prefix
         country_language_prefix = get_country_language_prefix()
-        if country_language_prefix not in request.path_info:
-            path = re.sub("^/[a-z]{2}/", "/{}".format(country_language_prefix), request.path)
+        path_info = request.path_info
+        if not path_info.endswith("/"):
+            path_info = path_info + "/"
+        if country_language_prefix not in path_info:
+            path = re.sub("^/[a-z]{2}/", "/{}".format(country_language_prefix), path_info)
             if request.GET.urlencode():
                 path = "{}?{}".format(path, request.GET.urlencode())
             return redirect(path)
