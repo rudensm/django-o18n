@@ -9,8 +9,11 @@ class CountryLocaleMiddleware(LocaleMiddleware):
     
     def process_request(self, request):
         super().process_request(request)
+        language_from_path = translation.get_language_from_path(request.path_info)
+        if not language_from_path:
+            return
         from .util import get_country_language_from_request
-        request.COUNTRY, request.LANGUAGE_CODE = get_country_language_from_request(request)
+        request.COUNTRY, language_code = get_country_language_from_request(request)
         from . import country as country_mod
         try:
             country_mod.activate(request.COUNTRY)
