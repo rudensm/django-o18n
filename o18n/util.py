@@ -37,7 +37,7 @@ def _variant(country, language):
 def get_countries_by_language(language_code):
     countries = []
     for i in get_countries_setting():
-        if language_code in i[2]:
+        if language_code in i[1]:
             countries.append(i[0])
     return countries
 
@@ -54,10 +54,9 @@ def get_language_maps():
     global _language_maps
     if _language_maps is None:
         outer = {}
-        for country, main_language, other_languages in get_countries_setting():
+        for country, other_languages in get_countries_setting():
+            main_language = other_languages[0]
             inner = {}
-            if main_language is not None:
-                inner[None] = main_language, _variant(country, main_language)
             for language in other_languages:
                 inner[language] = language, _variant(country, language)
             outer[country] = inner
