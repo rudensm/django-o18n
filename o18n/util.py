@@ -70,27 +70,17 @@ def reset_caches(**kwargs):
     if kwargs['setting'] in {'COUNTRIES', 'O18N_COUNTRIES', 'LANGUAGES'}:
         _language_maps = None
 
-
-def get_country_language(request):
+def get_country_language_from_request(request):
     """
     Return the country and language information when found in the path.
     """
     regex_match = country_language_prefix_re.match(request.path_info)
-
-
     if regex_match:
         language, country = regex_match.groups()
     else:
         language = get_language()
-        countries = get_countries_by_language(get_language())
-        country = countries[0] if len(countries) else None
-    try:
-        language, language_code = get_language_maps()[country.lower()][language]
-    except (KeyError, AttributeError):
-        return None, None, settings.LANGUAGE_CODE
-
-
-    return country.lower(), language, language_code
+        country = get_default_country_for_language(language)
+    return country.lower(), language
 
 def get_country_language_prefix():
     """

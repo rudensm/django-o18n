@@ -1,18 +1,26 @@
 from django.conf import settings
 from django.conf.urls.i18n import is_language_prefix_patterns_used
-from django.utils import translation
 from django.middleware.locale import LocaleMiddleware
+from django.shortcuts import redirect
+from django.utils import translation
+import re
 
 class CountryLocaleMiddleware(LocaleMiddleware):
     
     def process_request(self, request):
         super().process_request(request)
-        from .util import get_country_language
-        request.COUNTRY = get_country_language(request)[0]
+        from .util import get_country_language_from_request
+        request.COUNTRY, request.LANGUAGE_CODE = get_country_language_from_request(request)
         from . import country as country_mod
         try:
             country_mod.activate(request.COUNTRY)
         except ValueError:
-            translation.activate(settings.LANGUAGE_CODE)
-            request.LANGUAGE_CODE = translation.get_language()
-            request.COUNTRY = None
+            from .util import get_default_country_for_language
+            request.COUNTRY = get_default_country_for_language(request.LANGUAGE_CODE)
+        from .util import get_country_language_prefix
+        country_language_prefix = get_country_language_prefix()
+        if country_language_prefix not in request.path_info:
+            path = re.sub("^/[a-z]{2}/", "/{}".format(country_language_prefix), request.path)
+            if request.GET.urlencode():
+                path = "{}?{}".format(path, request.GET.urlencode())
+            return redirect(path)
