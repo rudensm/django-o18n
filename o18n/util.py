@@ -80,7 +80,7 @@ def get_country_language_from_request(request):
     else:
         language = get_language()
         country = get_default_country_for_language(language)
-    return country.lower(), language
+    return country.lower() if country else None, language
 
 def get_country_language_prefix():
     """
