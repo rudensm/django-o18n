@@ -41,6 +41,10 @@ def get_countries_by_language(language_code):
             countries.append(i[0])
     return countries
 
+def get_default_country_for_language(language):
+    countries_by_language = get_countries_by_language(language)
+    return countries_by_language[0] if countries_by_language else None
+
 def get_language_maps():
     """
     Create a mapping of country -> URL language -> (language, language code).
@@ -55,10 +59,6 @@ def get_language_maps():
             if main_language is not None:
                 inner[None] = main_language, _variant(country, main_language)
             for language in other_languages:
-                if language == main_language:
-                    warnings.warn(
-                        "Main language '{}' needs not be in other languages "
-                        "for country '{}'.".format(main_language, country))
                 inner[language] = language, _variant(country, language)
             outer[country] = inner
         _language_maps = outer
@@ -97,13 +97,13 @@ def get_country_language_prefix():
     """
     Return the URL prefix according to the current country and language.
     """
-    from .country import get_country        # avoid import loop
-
-    country = get_country()
-    if country is None:
-        return None
-
     language = get_language().split('-')[0]
+    from .country import get_country        # avoid import loop
+    country = get_country() or get_default_country_for_language(language)
+    if country is None:
+
+        language = settings.LANGUAGE_CODE
+        country = get_default_country_for_language(language)
     language_map = get_language_maps()[country]
     if language in language_map:
         countries = get_countries_by_language(language)
