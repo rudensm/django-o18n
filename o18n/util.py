@@ -90,7 +90,6 @@ def get_country_language_prefix():
     from .country import get_country        # avoid import loop
     country = get_country() or get_default_country_for_language(language)
     if country is None:
-
         language = settings.LANGUAGE_CODE
         country = get_default_country_for_language(language)
     language_map = get_language_maps()[country]
@@ -99,6 +98,4 @@ def get_country_language_prefix():
         if len(countries) == 1:
             return language + "/"
         return "-".join((language, country.upper())) + "/"
-    elif None in language_map and language_map[None][0] == language:
-        return language
     return None
