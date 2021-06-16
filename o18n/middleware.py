@@ -25,8 +25,11 @@ class CountryLocaleMiddleware(LocaleMiddleware):
         if not path_info.endswith("/"):
             path_info = path_info + "/"
         country_language_prefix = get_country_language_prefix()
-        if not country_language_prefix or country_language_prefix.lower() not in path_info.lower():
-            path = re.sub("^/[a-z]{2}/", "/{}".format(country_language_prefix), path_info)
+        if not country_language_prefix or country_language_prefix not in path_info:
+            if re.search("^/[a-z]{2}/", path_info):
+                path = re.sub("^/[a-z]{2}/", "/{}".format(country_language_prefix), path_info)
+            elif re.search("^/[a-z]{2}-[a-z]{2}/", path_info):
+                path = re.sub("^/[a-z]{2}-[a-z]{2}/", "/{}".format(country_language_prefix), path_info)
             if request.GET.urlencode():
                 path = "{}?{}".format(path, request.GET.urlencode())
             return redirect(path)
