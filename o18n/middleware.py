@@ -26,6 +26,7 @@ class CountryLocaleMiddleware(LocaleMiddleware):
             path_info = path_info + "/"
         country_language_prefix = get_country_language_prefix()
         if not country_language_prefix or country_language_prefix not in path_info:
+            path = path_info
             if re.search("^/[a-z]{2}/", path_info):
                 path = re.sub("^/[a-z]{2}/", "/{}".format(country_language_prefix), path_info)
             elif re.search("^/[a-z]{2}-[a-z]{2}/", path_info):
