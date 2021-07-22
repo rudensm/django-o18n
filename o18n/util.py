@@ -83,7 +83,7 @@ def get_country_language_from_request(request):
     regex_match = country_language_prefix_re.match(request.path_info)
     if regex_match:
         language, country = regex_match.groups()
-        if language not in get_country_languages(country.lower()):
+        if language and country and language not in get_country_languages(country.lower()):
             country = get_default_country_for_language(language)
     else:
         language = get_language()
