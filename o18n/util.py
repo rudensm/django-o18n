@@ -45,6 +45,12 @@ def get_default_country_for_language(language):
     countries_by_language = get_countries_by_language(language)
     return countries_by_language[0] if countries_by_language else None
 
+def get_country_languages(country):
+    for c_country, other_languages in get_countries_setting():
+        if c_country == country:
+            return other_languages
+    return None
+
 def get_language_maps():
     """
     Create a mapping of country -> URL language -> (language, language code).
@@ -77,6 +83,8 @@ def get_country_language_from_request(request):
     regex_match = country_language_prefix_re.match(request.path_info)
     if regex_match:
         language, country = regex_match.groups()
+        if language not in get_country_languages(country.lower()):
+            country = get_default_country_for_language(language)
     else:
         language = get_language()
         country = get_default_country_for_language(language)

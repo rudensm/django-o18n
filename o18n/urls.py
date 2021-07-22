@@ -21,8 +21,8 @@ class CountryLocalePrefixPattern(LocalePrefixPattern):
     @property
     def language_prefix(self):
         language_code = get_language() or settings.LANGUAGE_CODE
-        if language_code == settings.LANGUAGE_CODE and not self.prefix_default_language:
-            return ''
-        else:
-            from .util import get_country_language_prefix
-            return get_country_language_prefix()
+        # if not self.prefix_default_language:
+        #     return ''
+        # else:
+        from .util import get_country_language_prefix
+        return get_country_language_prefix()
