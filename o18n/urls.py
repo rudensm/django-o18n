@@ -18,6 +18,12 @@ def o18n_patterns(*urls, prefix_default_language=True):
 
 class CountryLocalePrefixPattern(LocalePrefixPattern):
     
+    def match(self, path):
+        language_prefix = self.language_prefix
+        if language_prefix and path.startswith(language_prefix):
+            return path[len(language_prefix):], (), {}
+        return None
+    
     @property
     def language_prefix(self):
         language_code = get_language() or settings.LANGUAGE_CODE
