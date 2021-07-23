@@ -25,6 +25,11 @@ class CountryLocalePrefixPattern(LocalePrefixPattern):
         return None
     
     @property
+    def regex(self):
+        # This is only used by reverse() and cached in _reverse_dict.
+        return re.compile(self.language_prefix or "")
+    
+    @property
     def language_prefix(self):
         language_code = get_language() or settings.LANGUAGE_CODE
         # if not self.prefix_default_language:
