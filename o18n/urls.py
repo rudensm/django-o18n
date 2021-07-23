@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.urls import LocalePrefixPattern, URLResolver
 from django.utils.translation import get_language
+import re
 
 def o18n_patterns(*urls, prefix_default_language=True):
     """
